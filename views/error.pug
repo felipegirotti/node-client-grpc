@@ -1,0 +1,8 @@
+extends layout
+
+block content
+  header(class="masthead bg-primary text-white text-center")
+    div/container
+      h1(class="text-uppercase mb-0")= message      
+      h2= error.status
+      pre #{error.stack}

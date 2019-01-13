@@ -1,0 +1,56 @@
+
+
+// - syntax, package, option
+syntax = "proto3";
+
+package com.drz;
+
+option java_multiple_files = true;
+
+message PlaceGeoPoint {
+    double lat = 1;
+    double lon = 2;
+}
+
+message PlaceGeoLocationRequest {
+    int32 from = 1;
+    int32 size = 2;
+    PlaceGeoPoint topLeft = 3;
+    PlaceGeoPoint bottomRight = 4;
+    int64 clientId = 5;
+}
+
+message ClientResponse {
+    int64 id = 1;
+    string name = 2;
+    double lat = 3;
+    double lon = 4;
+}
+
+message PlaceResponse {
+    string name = 1;
+    int64 clientId = 2;
+    double lat = 3;
+    double lon = 4;
+}
+
+message PlaceGeoLocationResponse {
+    repeated PlaceResponse data = 1;
+}
+
+message ClientRequest {
+    int64 from = 1;
+    int64 size = 2;
+}
+
+message ClientsResponse {
+    repeated ClientResponse data = 1;
+}
+
+service PlaceGeoLocationService {
+    rpc near(PlaceGeoLocationRequest) returns (PlaceGeoLocationResponse);
+}
+
+service ClientService {
+    rpc all(ClientRequest) returns (ClientsResponse);
+}

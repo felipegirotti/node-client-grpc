@@ -1,0 +1,72 @@
+extends layout
+
+block content
+  <!-- Header -->
+  header(class="masthead bg-primary text-white text-center")
+    div(class="container")        
+      h1(class="text-uppercase mb-0") Select a client
+      hr(class="star-light")
+      div.control-group
+        div.row
+          div.col-lg-3 
+          div(class="form-group col-lg-6 mb-0")
+          
+            select.form-control(id='clients', onchange='clientChange(this)')
+              option(value='') Select Client    
+              each client in clients              
+                option(value=client.id) #{client.name}                  
+
+    section              
+      .container
+        #map
+  script(type='text/javascript').    
+    function clientChange(el) {
+        var data = !{JSON.stringify(clients).replace(/<\//g, '<\\/')}
+        if (el.value != '') {
+            var client = data.filter(c => { return c.id == el.value;})[0];
+            var map = new google.maps.Map(
+                document.getElementById('map'), { zoom: 18, center: {lat: client.lat, lng: client.lon} });
+            new google.maps.Marker({ position: {lat: client.lat, lng: client.lon}, map: map, label: client.name });
+
+            google.maps.event.addListener(map, 'idle', function() {
+                  var bounds =  map.getBounds();
+                  var ne = bounds.getNorthEast().toJSON();
+                  var sw = bounds.getSouthWest().toJSON();
+                  
+                  $.ajax({
+                    method: 'POST',
+                    contentType: "application/json",
+                    dataType: "json",                    
+                    url: '/search',
+                    data: JSON.stringify({topLeft: { lat: ne.lat, lon: ne.lng}, bottomRight: { lat: sw.lat, lon: sw.lng}, clientId: client.id}),
+                    success: (data) => {
+                      for (index in data) {
+                          var c = data[index];
+                          var marker = new google.maps.Marker({ position: {lat: c.lat, lng: c.lon}, map: map, label: c.name });      
+                          //- map.panTo({lat: c.lat, lng: c.lon});
+                      }                
+                    }, 
+                    error: (err) => {
+                      console.error(err);
+                    }
+                  });            
+         });
+
+            
+        }
+    }
+
+    function initMap() {
+            // The location of Uluru
+            var londrina = { lat: -23.1837, lng: -51.0946 };
+            // The map, centered at Uluru
+            var map = new google.maps.Map(
+                document.getElementById('map'), { zoom: 10, center: londrina });
+            // The marker, positioned at Uluru
+            var caixaEconomica = { lat: -23.3114913, lng: -51.1660693}
+            var marker = new google.maps.Marker({ position: caixaEconomica, map: map, label: "Caixa Economica Federal" });
+    }
+  
+  script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAs8Xq65HmklPiK0UA_ihikWIJ-8lkX4_k")
+    
+
